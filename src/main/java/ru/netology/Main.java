@@ -10,11 +10,10 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
+
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 
 public class Main {
     public static final String REMOTE_SERVICE_URL =
@@ -41,20 +40,17 @@ public class Main {
         });
         String[] words = nasaURL.getUrl().split("/");
 
-        try {
-            BufferedImage image;
-            URL url = new URL(nasaURL.getUrl());
 
-            image = ImageIO.read(url);
-
-            if (image != null) {
-                ImageIO.write(image, "jpg", new File(words[words.length - 1]));
+        try (BufferedInputStream in = new BufferedInputStream(new URL(nasaURL.getUrl()).openStream());
+             FileOutputStream fos = new FileOutputStream(words[words.length - 1])) {
+            byte[] buffer = new byte[1024];
+            int count;
+            while ((count = in.read(buffer, 0, buffer.length)) != -1) {
+                fos.write(buffer, 0, count);
+                fos.flush();
             }
-
-        } catch (FileNotFoundException e) {
-            System.out.println(e);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
-
-
     }
 }
