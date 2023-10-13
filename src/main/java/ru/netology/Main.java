@@ -12,7 +12,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 public class Main {
@@ -21,23 +20,25 @@ public class Main {
     public static ObjectMapper mapper = new ObjectMapper();
 
 
-    public static void main(String[] args) throws IOException {
-        CloseableHttpClient client =
-                HttpClientBuilder.create().setUserAgent("Nasa API").
-                        setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(5000).
-                                setSocketTimeout(30000).setRedirectsEnabled(false).build()).build();
-
-
+    public static void main(String[] args) {
         HttpGet request = new HttpGet(REMOTE_SERVICE_URL);
         request.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
+        Nasa nasaURL = null;
 
-        CloseableHttpResponse response = client.execute(request);
+        try (CloseableHttpClient client =
+                     HttpClientBuilder.create().setUserAgent("Nasa API").
+                             setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(5000).
+                                     setSocketTimeout(30000).setRedirectsEnabled(false).build()).build();
 
-        InputStream nasa = response.getEntity().getContent();
+             CloseableHttpResponse response = client.execute(request);
+        ) {
+            InputStream nasa = response.getEntity().getContent();
+            nasaURL = mapper.readValue(nasa, new TypeReference<>() {
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-
-        Nasa nasaURL = mapper.readValue(nasa, new TypeReference<>() {
-        });
         String[] words = nasaURL.getUrl().split("/");
 
 
