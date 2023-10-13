@@ -49,7 +49,7 @@ public class Main {
                 fos.write(buffer, 0, count);
                 fos.flush();
             }
-        } catch (MalformedURLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
